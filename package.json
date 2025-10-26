@@ -1,0 +1,63 @@
+{
+  "name": "@qastudio/playwright",
+  "version": "1.0.0",
+  "description": "A Playwright test reporter that integrates with QAStudio.dev test management platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "echo \"Tests to be implemented\" && exit 0",
+    "lint": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,js,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md,yml,yaml}\""
+  },
+  "keywords": [
+    "playwright",
+    "reporter",
+    "test",
+    "testing",
+    "qa",
+    "test-management",
+    "qastudio",
+    "qastudio.dev",
+    "test-automation",
+    "test-reporting"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/QAStudio-Dev/playwright.git"
+  },
+  "bugs": {
+    "url": "https://github.com/QAStudio-Dev/playwright/issues"
+  },
+  "homepage": "https://github.com/QAStudio-Dev/playwright#readme",
+  "peerDependencies": {
+    "@playwright/test": "^1.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

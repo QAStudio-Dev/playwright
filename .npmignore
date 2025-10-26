@@ -1,0 +1,54 @@
+# Source files
+src/
+tsconfig.json
+
+# Tests
+tests/
+*.test.ts
+*.spec.ts
+
+# Examples
+examples/
+
+# Development files
+.git/
+.github/
+.vscode/
+.idea/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Documentation
+docs/
+
+# CI/CD
+.travis.yml
+.circleci/
+.github/
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+.eslintrc*
+.prettierrc
+.prettierignore
+.editorconfig
+
+# Additional documentation (keep these in git, but not in npm package)
+CONTRIBUTING.md
+GETTING_STARTED.md
+PUBLISHING.md
+.github/
