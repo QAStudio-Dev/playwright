@@ -59,24 +59,22 @@ jobs:
           # Get the previous tag (if it exists)
           PREVIOUS_TAG=$(git describe --abbrev=0 --tags HEAD^ 2>/dev/null || echo "")
 
-          # Generate changelog
-          echo "## What's Changed" > RELEASE_NOTES.md
-          echo "" >> RELEASE_NOTES.md
+          # Generate changelog with random delimiter to avoid conflicts
+          delimiter="ghadelimiter_$(uuidgen)"
+
+          echo "notes<<${delimiter}" >> $GITHUB_OUTPUT
+          echo "## What's Changed" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
 
           if [ -z "$PREVIOUS_TAG" ]; then
-            # First release - show all commits
-            git log --pretty=format:"* %s (%h)" >> RELEASE_NOTES.md
+            # First release - show all commits (limited to 20)
+            git log --pretty=format:"* %s (%h)" | head -20 >> $GITHUB_OUTPUT
           else
             # Show commits since previous tag
-            git log $PREVIOUS_TAG..HEAD --pretty=format:"* %s (%h)" >> RELEASE_NOTES.md
+            git log $PREVIOUS_TAG..HEAD --pretty=format:"* %s (%h)" >> $GITHUB_OUTPUT
           fi
 
-          # Read changelog into output using a unique delimiter
-          {
-            echo 'notes<<CHANGELOG_EOF'
-            cat RELEASE_NOTES.md
-            echo 'CHANGELOG_EOF'
-          } >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
