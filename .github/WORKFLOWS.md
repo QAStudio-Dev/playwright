@@ -111,7 +111,7 @@ Once the release is created, the "Publish to npm" workflow will automatically tr
    - Package is published to npm
 
 3. **Verify:**
-   - Check npm: https://www.npmjs.com/package/@qastudio/playwright
+   - Check npm: https://www.npmjs.com/package/@qastudio-dev/playwright
    - Check GitHub Releases: https://github.com/QAStudio-Dev/playwright/releases
 
 ### Manual (Alternative)

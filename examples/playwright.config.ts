@@ -20,7 +20,7 @@ export default defineConfig({
 
     // Add QAStudio.dev reporter
     [
-      '@qastudio/playwright',
+      '@qastudio-dev/playwright',
       {
         // Required settings
         apiUrl: process.env.QA_STUDIO_API_URL || 'https://qastudio.dev/api',

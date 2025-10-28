@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is `@qastudio/playwright`, an npm package that provides a Playwright test reporter for QAStudio.dev test management platform. The package is published as a scoped npm package under the `@qastudio` organization.
+This is `@qastudio-dev/playwright`, an npm package that provides a Playwright test reporter for QAStudio.dev test management platform. The package is published as a scoped npm package under the `@qastudio` organization.
 
-**Package name**: `@qastudio/playwright`
+**Package name**: `@qastudio-dev/playwright`
 **Language**: TypeScript
 **Target**: Node.js >=16.0.0
 **Peer dependency**: `@playwright/test` ^1.0.0
@@ -150,16 +150,16 @@ To test changes with a local Playwright project:
 npm link
 
 # In your Playwright project
-npm link @qastudio/playwright
+npm link @qastudio-dev/playwright
 
 # Configure playwright.config.ts to use the reporter
-reporter: [['@qastudio/playwright', { ... }]]
+reporter: [['@qastudio-dev/playwright', { ... }]]
 ```
 
 ## Important Notes
 
 - **API URL**: Default is `https://qastudio.dev/api`
-- **User-Agent**: Set to `@qastudio/playwright/1.0.0` in API requests
+- **User-Agent**: Set to `@qastudio-dev/playwright/1.0.0` in API requests
 - **Error messages**: Prefixed with `[QAStudio.dev Reporter]` for easy identification
 - **Environment variables**: Expected format is `QA_STUDIO_API_URL`, `QA_STUDIO_API_KEY`, `QA_STUDIO_PROJECT_ID`
 

@@ -26,7 +26,7 @@ import {
  * // playwright.config.ts
  * export default defineConfig({
  *   reporter: [
- *     ['@qastudio/playwright', {
+ *     ['@qastudio-dev/playwright', {
  *       apiUrl: 'https://qastudio.dev/api',
  *       apiKey: process.env.QA_STUDIO_API_KEY,
  *       projectId: 'abc123',

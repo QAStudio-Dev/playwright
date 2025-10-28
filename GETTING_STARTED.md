@@ -13,13 +13,13 @@ This guide will help you set up and start using the QAStudio.dev reporter with y
 Install the reporter as a dev dependency:
 
 ```bash
-npm install --save-dev @qastudio/playwright
+npm install --save-dev @qastudio-dev/playwright
 ```
 
 Or with yarn:
 
 ```bash
-yarn add -D @qastudio/playwright
+yarn add -D @qastudio-dev/playwright
 ```
 
 ## Step 2: Get Your QAStudio.dev API Credentials
@@ -58,7 +58,7 @@ export default defineConfig({
 
     // Add QAStudio.dev reporter
     [
-      '@qastudio/playwright',
+      '@qastudio-dev/playwright',
       {
         apiUrl: process.env.QA_STUDIO_API_URL!,
         apiKey: process.env.QA_STUDIO_API_KEY!,
@@ -160,7 +160,7 @@ test('critical user workflow', async ({ page }) => {
 export default defineConfig({
   reporter: [
     [
-      '@qastudio/playwright',
+      '@qastudio-dev/playwright',
       {
         apiUrl: process.env.QA_STUDIO_API_URL!,
         apiKey: process.env.QA_STUDIO_API_KEY!,
@@ -179,7 +179,7 @@ export default defineConfig({
 export default defineConfig({
   reporter: [
     [
-      '@qastudio/playwright',
+      '@qastudio-dev/playwright',
       {
         // ... other options
         milestoneId: 'milestone-id-here',
@@ -197,7 +197,7 @@ For debugging, enable verbose mode:
 export default defineConfig({
   reporter: [
     [
-      '@qastudio/playwright',
+      '@qastudio-dev/playwright',
       {
         // ... other options
         verbose: true,

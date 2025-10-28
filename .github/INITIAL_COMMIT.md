@@ -4,7 +4,7 @@ This document verifies that all files are ready for the initial commit to the re
 
 ## ✅ Core Package Files
 
-- [x] `package.json` - Package metadata with correct name `@qastudio/playwright`
+- [x] `package.json` - Package metadata with correct name `@qastudio-dev/playwright`
 - [x] `package-lock.json` - Dependency lock file (should be committed)
 - [x] `tsconfig.json` - TypeScript configuration
 - [x] `.prettierrc` - Code formatting rules
@@ -74,7 +74,7 @@ Only these will be published to npm:
 ## ✅ Repository Configuration
 
 - [x] Repository URL: `https://github.com/QAStudio-Dev/playwright`
-- [x] Package name: `@qastudio/playwright`
+- [x] Package name: `@qastudio-dev/playwright`
 - [x] All URLs updated throughout documentation
 - [x] GitHub Actions configured for QAStudio-Dev organization
 
@@ -110,7 +110,7 @@ All files are properly configured and ready to be committed. No sensitive data i
 ```
 chore: initial commit
 
-- Add @qastudio/playwright package structure
+- Add @qastudio-dev/playwright package structure
 - Implement Playwright reporter for QAStudio.dev
 - Add comprehensive documentation
 - Configure GitHub Actions workflows for CI/CD

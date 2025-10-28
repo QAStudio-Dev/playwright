@@ -46,6 +46,6 @@ jobs:
         run: |
           echo "## 📦 Published to npm" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Package:** @qastudio/playwright" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** @qastudio-dev/playwright" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**Release:** ${{ github.event.release.html_url }}" >> $GITHUB_STEP_SUMMARY

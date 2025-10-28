@@ -91,7 +91,7 @@ jobs:
           ## Installation
 
           \`\`\`bash
-          npm install --save-dev @qastudio/playwright@${{ steps.version.outputs.new_version }}
+          npm install --save-dev @qastudio-dev/playwright@${{ steps.version.outputs.new_version }}
           \`\`\`
 
           **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.version.outputs.tag }}"

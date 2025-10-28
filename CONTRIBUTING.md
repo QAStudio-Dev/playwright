@@ -8,7 +8,7 @@ Thank you for considering contributing to this project! Here are some guidelines
 
 ```bash
 git clone https://github.com/QAStudio-Dev/playwright.git
-cd @qastudio/playwright
+cd @qastudio-dev/playwright
 ```
 
 2. **Install dependencies**
@@ -26,7 +26,7 @@ npm run build
 ## Project Structure
 
 ```
-@qastudio/playwright/
+@qastudio-dev/playwright/
 ├── src/
 │   ├── index.ts          # Main reporter class
 │   ├── api-client.ts     # QA Studio API client
@@ -63,7 +63,7 @@ npm run build
    ```bash
    npm link
    cd /path/to/playwright/project
-   npm link @qastudio/playwright
+   npm link @qastudio-dev/playwright
    ```
 
 ### Code Style

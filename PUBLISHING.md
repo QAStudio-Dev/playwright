@@ -1,6 +1,6 @@
 # Publishing Guide
 
-This guide covers how to publish the `@qastudio/playwright` package to npm.
+This guide covers how to publish the `@qastudio-dev/playwright` package to npm.
 
 ## Publishing Methods
 
@@ -81,7 +81,7 @@ Enter your:
 ### 4. Check Package Name Availability
 
 ```bash
-npm search @qastudio/playwright
+npm search @qastudio-dev/playwright
 ```
 
 If the name is taken, you can either:
@@ -154,7 +154,7 @@ This creates a `.tgz` file. Test it in another project:
 
 ```bash
 cd /path/to/test-project
-npm install /path/to/@qastudio/playwright/@qastudio/playwright-1.0.0.tgz
+npm install /path/to/@qastudio-dev/playwright/@qastudio-dev/playwright-1.0.0.tgz
 ```
 
 ### 5. Publish to npm
@@ -251,7 +251,7 @@ Add `NPM_TOKEN` to GitHub secrets:
 ### 1. Verify the Package
 
 ```bash
-npm info @qastudio/playwright
+npm info @qastudio-dev/playwright
 ```
 
 ### 2. Test Installation
@@ -259,7 +259,7 @@ npm info @qastudio/playwright
 In a fresh project:
 
 ```bash
-npm install --save-dev @qastudio/playwright
+npm install --save-dev @qastudio-dev/playwright
 ```
 
 ### 3. Update Documentation
@@ -281,13 +281,13 @@ If package name changed, update:
 You can only unpublish within 72 hours:
 
 ```bash
-npm unpublish @qastudio/playwright@1.0.0
+npm unpublish @qastudio-dev/playwright@1.0.0
 ```
 
 **Note:** Unpublishing is discouraged. Use deprecation instead:
 
 ```bash
-npm deprecate @qastudio/playwright@1.0.0 "This version has critical bugs, please upgrade to 1.0.1"
+npm deprecate @qastudio-dev/playwright@1.0.0 "This version has critical bugs, please upgrade to 1.0.1"
 ```
 
 ## Version Management Best Practices

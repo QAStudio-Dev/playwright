@@ -1,6 +1,6 @@
 # Playwright Reporter for QAStudio.dev
 
-[![npm version](https://badge.fury.io/js/@qastudio%2Fplaywright.svg)](https://www.npmjs.com/package/@qastudio/playwright)
+[![npm version](https://badge.fury.io/js/@qastudio%2Fplaywright.svg)](https://www.npmjs.com/package/@qastudio-dev/playwright)
 [![CI](https://github.com/QAStudio-Dev/playwright/actions/workflows/test.yml/badge.svg)](https://github.com/QAStudio-Dev/playwright/actions/workflows/test.yml)
 [![Publish](https://github.com/QAStudio-Dev/playwright/actions/workflows/publish.yml/badge.svg)](https://github.com/QAStudio-Dev/playwright/actions/workflows/publish.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -22,13 +22,13 @@ A comprehensive Playwright test reporter that automatically sends test results t
 ## Installation
 
 ```bash
-npm install --save-dev @qastudio/playwright
+npm install --save-dev @qastudio-dev/playwright
 ```
 
 Or with yarn:
 
 ```bash
-yarn add -D @qastudio/playwright
+yarn add -D @qastudio-dev/playwright
 ```
 
 ## Quick Start
@@ -54,7 +54,7 @@ export default defineConfig({
   reporter: [
     ['list'], // Keep default reporters
     [
-      '@qastudio/playwright',
+      '@qastudio-dev/playwright',
       {
         apiUrl: process.env.QA_STUDIO_API_URL!,
         apiKey: process.env.QA_STUDIO_API_KEY!,
@@ -155,7 +155,7 @@ To add results to an existing test run instead of creating a new one:
 export default defineConfig({
   reporter: [
     [
-      '@qastudio/playwright',
+      '@qastudio-dev/playwright',
       {
         apiUrl: process.env.QA_STUDIO_API_URL!,
         apiKey: process.env.QA_STUDIO_API_KEY!,
@@ -210,7 +210,7 @@ Enable verbose logging to troubleshoot issues:
 export default defineConfig({
   reporter: [
     [
-      '@qastudio/playwright',
+      '@qastudio-dev/playwright',
       {
         // ... other options
         verbose: true, // Enable detailed logs
@@ -316,7 +316,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ```bash
 # Clone the repository
 git clone https://github.com/QAStudio-Dev/playwright.git
-cd @qastudio/playwright
+cd @qastudio-dev/playwright
 
 # Install dependencies
 npm install

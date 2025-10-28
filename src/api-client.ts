@@ -141,7 +141,7 @@ export class QAStudioAPIClient {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
-          'User-Agent': '@qastudio/playwright/1.0.0',
+          'User-Agent': '@qastudio-dev/playwright/1.0.0',
           ...(bodyData ? { 'Content-Length': Buffer.byteLength(bodyData) } : {}),
           ...options.headers,
         },
