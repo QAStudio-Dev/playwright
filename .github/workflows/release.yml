@@ -71,10 +71,12 @@ jobs:
             git log $PREVIOUS_TAG..HEAD --pretty=format:"* %s (%h)" >> RELEASE_NOTES.md
           fi
 
-          # Read changelog into output
-          echo "notes<<EOF" >> $GITHUB_OUTPUT
-          cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Read changelog into output using a unique delimiter
+          {
+            echo 'notes<<CHANGELOG_EOF'
+            cat RELEASE_NOTES.md
+            echo 'CHANGELOG_EOF'
+          } >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
