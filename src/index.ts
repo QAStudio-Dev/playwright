@@ -215,6 +215,11 @@ export default class QAStudioReporter implements Reporter {
         });
 
         this.log('Test run completed successfully');
+
+        // Trigger notifications
+        await this.apiClient.triggerNotifications({
+          testRunId: this.state.testRunId,
+        });
       }
     } catch (error) {
       this.handleError('Failed to send test results', error);

@@ -196,6 +196,20 @@ export class QAStudioAPIClient {
   }
 
   /**
+   * Trigger notifications for completed test run
+   */
+  async triggerNotifications(request: { testRunId: string }): Promise<void> {
+    this.log(`Triggering notifications for test run: ${request.testRunId}`);
+
+    await this.request<void>(`/test-runs/${request.testRunId}/notifications`, {
+      method: 'POST',
+      body: {},
+    });
+
+    this.log('Notifications triggered successfully');
+  }
+
+  /**
    * Log message if verbose mode is enabled
    */
   private log(message: string, ...args: unknown[]): void {
