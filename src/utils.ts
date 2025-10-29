@@ -211,6 +211,57 @@ export function generateTestRunName(): string {
 }
 
 /**
+ * Strip ANSI escape codes from a string
+ * Removes color codes and other terminal formatting that can interfere with API calls
+ */
+export function stripAnsi(str: string | undefined): string | undefined {
+  if (!str) return str;
+
+  const cleaned = str
+    // Remove ANSI escape sequences (e.g., \x1b[31m, \x1b[0m)
+    .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
+    // Remove bracket codes (e.g., [31m, [0m)
+    .replace(/\[\d+m/g, '')
+    // Remove multi-digit bracket codes (e.g., [1;31m)
+    .replace(/\[\d+;\d+m/g, '')
+    // Trim any whitespace that may have been left
+    .trim();
+
+  // Log warning if ANSI codes were detected and removed
+  if (cleaned !== str.trim()) {
+    console.warn(
+      '[QAStudio.dev Reporter] Warning: ANSI escape codes detected and removed from configuration value'
+    );
+  }
+
+  return cleaned;
+}
+
+/**
+ * Sanitize and validate a URL string
+ */
+export function sanitizeUrl(url: string): string {
+  const cleaned = stripAnsi(url) || '';
+
+  // Validate URL format
+  try {
+    new URL(cleaned);
+    return cleaned;
+  } catch (error) {
+    throw new Error(
+      `Invalid URL format: "${cleaned}". Please ensure apiUrl is a valid URL (e.g., https://qastudio.dev/api)`
+    );
+  }
+}
+
+/**
+ * Sanitize a string field by removing ANSI codes
+ */
+export function sanitizeString(str: string | undefined): string | undefined {
+  return stripAnsi(str);
+}
+
+/**
  * Validate reporter options
  */
 export function validateOptions(options: unknown): void {
@@ -231,4 +282,7 @@ export function validateOptions(options: unknown): void {
   if (!opts.projectId || typeof opts.projectId !== 'string') {
     throw new Error('QAStudio.dev reporter: projectId is required and must be a string');
   }
+
+  // Validate URL format after stripping ANSI codes
+  sanitizeUrl(opts.apiUrl);
 }

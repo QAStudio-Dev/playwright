@@ -14,6 +14,8 @@ import {
   formatDuration,
   generateTestRunName,
   validateOptions,
+  sanitizeUrl,
+  sanitizeString,
 } from './utils';
 
 /**
@@ -60,19 +62,32 @@ export default class QAStudioReporter implements Reporter {
     // Validate options
     validateOptions(options);
 
+    // Sanitize all string options to remove ANSI codes
+    const sanitizedOptions = {
+      ...options,
+      apiUrl: sanitizeUrl(options.apiUrl),
+      apiKey: sanitizeString(options.apiKey) || '',
+      projectId: sanitizeString(options.projectId) || '',
+      environment: sanitizeString(options.environment) || undefined,
+      testRunId: sanitizeString(options.testRunId) || undefined,
+      testRunName: sanitizeString(options.testRunName) || undefined,
+      testRunDescription: sanitizeString(options.testRunDescription) || undefined,
+      milestoneId: sanitizeString(options.milestoneId) || undefined,
+    };
+
     // Set defaults
     this.options = {
-      ...options,
-      environment: options.environment ?? 'default',
-      createTestRun: options.createTestRun ?? true,
-      verbose: options.verbose ?? false,
-      batchSize: options.batchSize ?? 10,
-      uploadScreenshots: options.uploadScreenshots ?? true,
-      uploadVideos: options.uploadVideos ?? true,
-      maxRetries: options.maxRetries ?? 3,
-      timeout: options.timeout ?? 30000,
-      silent: options.silent ?? true,
-      testRunName: options.testRunName ?? generateTestRunName(),
+      ...sanitizedOptions,
+      environment: sanitizedOptions.environment ?? 'default',
+      createTestRun: sanitizedOptions.createTestRun ?? true,
+      verbose: sanitizedOptions.verbose ?? false,
+      batchSize: sanitizedOptions.batchSize ?? 10,
+      uploadScreenshots: sanitizedOptions.uploadScreenshots ?? true,
+      uploadVideos: sanitizedOptions.uploadVideos ?? true,
+      maxRetries: sanitizedOptions.maxRetries ?? 3,
+      timeout: sanitizedOptions.timeout ?? 30000,
+      silent: sanitizedOptions.silent ?? true,
+      testRunName: sanitizedOptions.testRunName ?? generateTestRunName(),
     };
 
     this.apiClient = new QAStudioAPIClient(this.options);
