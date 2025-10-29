@@ -21,7 +21,7 @@
     "build": "tsc",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "vitest run",
+    "test": "vitest run --exclude='**/examples/**' --exclude='**/dist/**' --exclude='**/node_modules/**'",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "tsc --noEmit",
