@@ -147,10 +147,28 @@ export function extractAttachments(result: TestResult): QAStudioAttachment[] {
   for (const attachment of result.attachments) {
     const type = determineAttachmentType(attachment.name, attachment.contentType);
 
+    // Get attachment body - if it's a path, read the file synchronously
+    let body: string | Buffer = '';
+    if (attachment.body) {
+      body = attachment.body;
+    } else if (attachment.path) {
+      // Read file from disk and convert to base64
+      try {
+        const fileBuffer = fs.readFileSync(attachment.path);
+        body = fileBuffer.toString('base64');
+      } catch (error) {
+        console.warn(
+          `[QAStudio.dev Reporter] Failed to read attachment file: ${attachment.path}`,
+          error
+        );
+        continue; // Skip this attachment if we can't read it
+      }
+    }
+
     attachments.push({
       name: attachment.name,
       contentType: attachment.contentType,
-      body: attachment.body || attachment.path || '',
+      body,
       type,
     });
   }

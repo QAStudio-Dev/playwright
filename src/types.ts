@@ -242,7 +242,8 @@ export interface QAStudioAttachment {
   contentType: string;
 
   /**
-   * File path or base64 encoded content
+   * Base64 encoded file content or Buffer
+   * When string, it should be base64 encoded binary data
    */
   body: string | Buffer;
 
