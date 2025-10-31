@@ -46,6 +46,10 @@ export default class QAStudioReporter implements Reporter {
     batchSize: number;
     uploadScreenshots: boolean;
     uploadVideos: boolean;
+    includeErrorSnippet: boolean;
+    includeErrorLocation: boolean;
+    includeTestSteps: boolean;
+    includeConsoleOutput: boolean;
     maxRetries: number;
     timeout: number;
     silent: boolean;
@@ -84,6 +88,10 @@ export default class QAStudioReporter implements Reporter {
       batchSize: sanitizedOptions.batchSize ?? 10,
       uploadScreenshots: sanitizedOptions.uploadScreenshots ?? true,
       uploadVideos: sanitizedOptions.uploadVideos ?? true,
+      includeErrorSnippet: sanitizedOptions.includeErrorSnippet ?? true,
+      includeErrorLocation: sanitizedOptions.includeErrorLocation ?? true,
+      includeTestSteps: sanitizedOptions.includeTestSteps ?? true,
+      includeConsoleOutput: sanitizedOptions.includeConsoleOutput ?? false,
       maxRetries: sanitizedOptions.maxRetries ?? 3,
       timeout: sanitizedOptions.timeout ?? 30000,
       silent: sanitizedOptions.silent ?? true,
@@ -236,7 +244,12 @@ export default class QAStudioReporter implements Reporter {
     for (const [_testId, testData] of this.state.tests) {
       // Only send final result (not retries)
       if (testData.result.retry === testData.test.retries) {
-        const qaResult = convertTestResult(testData.test, testData.result, testData.startTime);
+        const qaResult = convertTestResult(
+          testData.test,
+          testData.result,
+          testData.startTime,
+          this.options
+        );
 
         // Filter attachments based on options
         if (qaResult.attachments) {

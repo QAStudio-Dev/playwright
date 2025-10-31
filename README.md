@@ -13,6 +13,8 @@ A comprehensive Playwright test reporter that automatically sends test results t
 - ✅ Auto-creation of test runs
 - ✅ Map Playwright tests to QAStudio.dev test cases
 - ✅ Upload screenshots and videos for failed tests
+- ✅ Capture error context (code snippets, error location, test steps)
+- ✅ Include console output for enhanced debugging
 - ✅ Batch API requests for optimal performance
 - ✅ Retry handling (only reports final results)
 - ✅ Detailed error handling with fallback mode
@@ -77,24 +79,28 @@ Test results will be automatically sent to QAStudio.dev!
 
 ## Configuration Options
 
-| Option               | Type    | Required | Default        | Description                                         |
-| -------------------- | ------- | -------- | -------------- | --------------------------------------------------- |
-| `apiUrl`             | string  | ✅       | -              | QAStudio.dev API base URL                           |
-| `apiKey`             | string  | ✅       | -              | API key for authentication                          |
-| `projectId`          | string  | ✅       | -              | QAStudio.dev project ID                             |
-| `testRunId`          | string  | ❌       | -              | Existing test run ID (auto-created if not provided) |
-| `environment`        | string  | ❌       | `'default'`    | Environment name (e.g., 'CI', 'staging')            |
-| `createTestRun`      | boolean | ❌       | `true`         | Auto-create test run if testRunId not provided      |
-| `testRunName`        | string  | ❌       | Auto-generated | Name for new test runs                              |
-| `testRunDescription` | string  | ❌       | -              | Description for new test runs                       |
-| `milestoneId`        | string  | ❌       | -              | Associate test run with milestone                   |
-| `verbose`            | boolean | ❌       | `false`        | Enable detailed logging                             |
-| `batchSize`          | number  | ❌       | `10`           | Batch size for sending results                      |
-| `uploadScreenshots`  | boolean | ❌       | `true`         | Upload screenshots for failed tests                 |
-| `uploadVideos`       | boolean | ❌       | `true`         | Upload videos for failed tests                      |
-| `maxRetries`         | number  | ❌       | `3`            | Max retry attempts for API requests                 |
-| `timeout`            | number  | ❌       | `30000`        | API request timeout (ms)                            |
-| `silent`             | boolean | ❌       | `true`         | Don't fail tests if API is unavailable              |
+| Option                 | Type    | Required | Default        | Description                                         |
+| ---------------------- | ------- | -------- | -------------- | --------------------------------------------------- |
+| `apiUrl`               | string  | ✅       | -              | QAStudio.dev API base URL                           |
+| `apiKey`               | string  | ✅       | -              | API key for authentication                          |
+| `projectId`            | string  | ✅       | -              | QAStudio.dev project ID                             |
+| `testRunId`            | string  | ❌       | -              | Existing test run ID (auto-created if not provided) |
+| `environment`          | string  | ❌       | `'default'`    | Environment name (e.g., 'CI', 'staging')            |
+| `createTestRun`        | boolean | ❌       | `true`         | Auto-create test run if testRunId not provided      |
+| `testRunName`          | string  | ❌       | Auto-generated | Name for new test runs                              |
+| `testRunDescription`   | string  | ❌       | -              | Description for new test runs                       |
+| `milestoneId`          | string  | ❌       | -              | Associate test run with milestone                   |
+| `verbose`              | boolean | ❌       | `false`        | Enable detailed logging                             |
+| `batchSize`            | number  | ❌       | `10`           | Batch size for sending results                      |
+| `uploadScreenshots`    | boolean | ❌       | `true`         | Upload screenshots for failed tests                 |
+| `uploadVideos`         | boolean | ❌       | `true`         | Upload videos for failed tests                      |
+| `includeErrorSnippet`  | boolean | ❌       | `true`         | Include code snippet showing where error occurred   |
+| `includeErrorLocation` | boolean | ❌       | `true`         | Include precise error location (file, line, column) |
+| `includeTestSteps`     | boolean | ❌       | `true`         | Include test execution steps for failed tests       |
+| `includeConsoleOutput` | boolean | ❌       | `false`        | Include console output (stdout/stderr)              |
+| `maxRetries`           | number  | ❌       | `3`            | Max retry attempts for API requests                 |
+| `timeout`              | number  | ❌       | `30000`        | API request timeout (ms)                            |
+| `silent`               | boolean | ❌       | `true`         | Don't fail tests if API is unavailable              |
 
 ## Linking Tests to QAStudio.dev Test Cases
 
@@ -144,6 +150,89 @@ test('critical user flow', async ({ page }) => {
 ```
 
 All annotations are sent to QAStudio.dev as metadata.
+
+## Error Context and Debugging
+
+By default, the reporter captures rich error context to help debug failed tests:
+
+### What's Captured by Default
+
+- **Error Code Snippet**: The actual code where the error occurred, with the failing line highlighted
+- **Precise Error Location**: File path, line number, and column where the error happened
+- **Test Execution Steps**: Step-by-step trace of what Playwright was doing when the test failed
+- **Console Output**: Standard output and errors (disabled by default, opt-in)
+
+### Customizing Error Context
+
+You can control what error context is captured:
+
+```typescript
+export default defineConfig({
+  reporter: [
+    [
+      '@qastudio-dev/playwright',
+      {
+        // ... other options
+        includeErrorSnippet: true, // Include code snippet (default: true)
+        includeErrorLocation: true, // Include error location (default: true)
+        includeTestSteps: true, // Include execution steps (default: true)
+        includeConsoleOutput: false, // Include stdout/stderr (default: false)
+      },
+    ],
+  ],
+});
+```
+
+### Disabling Error Context
+
+To reduce data sent to the platform, you can disable specific features:
+
+```typescript
+{
+  includeErrorSnippet: false,     // Don't send code snippets
+  includeErrorLocation: false,    // Don't send precise error location
+  includeTestSteps: false,        // Don't send execution steps
+  includeConsoleOutput: false,    // Don't send console output (already default)
+}
+```
+
+### Example: Error Context Data
+
+When a test fails with error context enabled, the reporter sends:
+
+```typescript
+{
+  error: "Expected 'Login' to be visible",
+  stackTrace: "Error: Expected 'Login' to be visible\n  at ...",
+  errorSnippet: "  23 | await expect(page.getByRole('button', { name: 'Login' })).toBeVisible();\n      ^",
+  errorLocation: {
+    file: "/tests/auth.spec.ts",
+    line: 23,
+    column: 5
+  },
+  steps: [
+    {
+      title: "page.goto",
+      category: "pw:api",
+      duration: 1245,
+      location: { file: "/tests/auth.spec.ts", line: 21, column: 3 }
+    },
+    {
+      title: "expect.toBeVisible",
+      category: "expect",
+      duration: 5000,
+      error: "Expected 'Login' to be visible",
+      location: { file: "/tests/auth.spec.ts", line: 23, column: 5 }
+    }
+  ],
+  consoleOutput: {
+    stdout: "Test starting...\nNavigating to login page...",
+    stderr: "Warning: Deprecated API usage"
+  }
+}
+```
+
+This rich context makes it much easier to understand and debug test failures directly in QAStudio.dev.
 
 ## Advanced Configuration
 
@@ -253,6 +342,10 @@ Each test result includes:
 - Status (passed/failed/skipped/timedOut)
 - Duration
 - Error messages and stack traces
+- **Code snippet showing where error occurred** (if available)
+- **Precise error location** (file, line, column)
+- **Test execution steps** with timing and errors
+- **Console output** (stdout/stderr, optional)
 - Attachments (screenshots, videos, traces)
 - Browser/project information
 - Custom metadata from annotations

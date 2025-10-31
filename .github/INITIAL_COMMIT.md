@@ -43,6 +43,7 @@ This document verifies that all files are ready for the initial commit to the re
 ## ✅ Ignore Files
 
 ### .gitignore
+
 - [x] Excludes `node_modules/`
 - [x] Excludes `dist/` (build output)
 - [x] Excludes `.env` files
@@ -52,12 +53,15 @@ This document verifies that all files are ready for the initial commit to the re
 - [x] Excludes OS files (`.DS_Store`, `Thumbs.db`)
 
 ### .npmignore
+
 - [x] Excludes source files (`src/`, `tsconfig.json`)
 - [x] Excludes development files (`.github/`, examples, tests)
 - [x] Excludes config files (`.prettierrc`, `.prettierignore`)
 
 ### package.json "files" field
+
 Only these will be published to npm:
+
 - [x] `dist/` - Compiled JavaScript and type definitions
 - [x] `README.md` - Package documentation
 - [x] `LICENSE` - License file

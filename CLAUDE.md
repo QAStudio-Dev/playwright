@@ -58,9 +58,10 @@ The package consists of four main modules in `src/`:
    - Test result and attachment types for data mapping
 
 4. **`utils.ts`** - Helper functions
-   - `convertTestResult()` - Maps Playwright `TestResult` to QAStudio.dev format
+   - `convertTestResult()` - Maps Playwright `TestResult` to QAStudio.dev format (includes error context)
    - `extractTestCaseId()` - Extracts test case IDs from annotations or title patterns like `[QA-123]`
    - `extractMetadata()` - Pulls custom annotations (tags, priority, owner, etc.)
+   - `extractConsoleOutput()` - Extracts and combines stdout/stderr from test results
    - `batchArray()` - Splits arrays into batches for efficient API calls
    - `validateOptions()` - Validates required reporter configuration
 
@@ -71,6 +72,7 @@ The package consists of four main modules in `src/`:
 3. **`onTestEnd`**: Updates test data, increments counters (only for final retry)
 4. **`onEnd`**:
    - Converts all test results to QAStudio.dev format
+   - Captures error context (snippet, location, steps, console output) based on options
    - Filters attachments based on `uploadScreenshots`/`uploadVideos` options
    - Batches results (default: 10 per batch)
    - Submits batches sequentially with error handling
@@ -173,6 +175,10 @@ Key default values in reporter options:
 - `batchSize`: `10`
 - `uploadScreenshots`: `true`
 - `uploadVideos`: `true`
+- `includeErrorSnippet`: `true`
+- `includeErrorLocation`: `true`
+- `includeTestSteps`: `true`
+- `includeConsoleOutput`: `false`
 - `maxRetries`: `3`
 - `timeout`: `30000` (30 seconds)
 - `silent`: `true`

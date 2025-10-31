@@ -77,6 +77,30 @@ export interface QAStudioReporterOptions {
   uploadVideos?: boolean;
 
   /**
+   * Include code snippet showing where the error occurred
+   * @default true
+   */
+  includeErrorSnippet?: boolean;
+
+  /**
+   * Include precise error location (file, line, column)
+   * @default true
+   */
+  includeErrorLocation?: boolean;
+
+  /**
+   * Include test execution steps for failed tests
+   * @default true
+   */
+  includeTestSteps?: boolean;
+
+  /**
+   * Include console output (stdout/stderr) for failed tests
+   * @default false
+   */
+  includeConsoleOutput?: boolean;
+
+  /**
    * Maximum number of retry attempts for API requests
    * @default 3
    */
@@ -133,6 +157,44 @@ export interface QAStudioTestResult {
    * Stack trace (if failed)
    */
   stackTrace?: string;
+
+  /**
+   * Code snippet showing where the error occurred (if failed)
+   */
+  errorSnippet?: string;
+
+  /**
+   * Precise error location (if different from test location)
+   */
+  errorLocation?: {
+    file: string;
+    line: number;
+    column: number;
+  };
+
+  /**
+   * Test execution steps
+   */
+  steps?: Array<{
+    title: string;
+    category: string;
+    startTime: string;
+    duration: number;
+    error?: string;
+    location?: {
+      file: string;
+      line: number;
+      column: number;
+    };
+  }>;
+
+  /**
+   * Console output from the test
+   */
+  consoleOutput?: {
+    stdout?: string;
+    stderr?: string;
+  };
 
   /**
    * Start time (ISO 8601)

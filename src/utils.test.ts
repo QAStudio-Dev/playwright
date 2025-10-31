@@ -198,7 +198,11 @@ describe('batchArray', () => {
   it('should handle exact multiples', () => {
     const array = [1, 2, 3, 4, 5, 6];
     const batches = batchArray(array, 2);
-    expect(batches).toEqual([[1, 2], [3, 4], [5, 6]]);
+    expect(batches).toEqual([
+      [1, 2],
+      [3, 4],
+      [5, 6],
+    ]);
   });
 });
 

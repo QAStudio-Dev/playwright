@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import type { TestCase, TestResult, Suite } from '@playwright/test/reporter';
-import type { QAStudioTestResult, QAStudioAttachment } from './types';
+import type { QAStudioTestResult, QAStudioAttachment, QAStudioReporterOptions } from './types';
 
 /**
  * Convert Playwright test result to QAStudio.dev format
@@ -8,11 +8,18 @@ import type { QAStudioTestResult, QAStudioAttachment } from './types';
 export function convertTestResult(
   test: TestCase,
   result: TestResult,
-  startTime: Date
+  startTime: Date,
+  options?: QAStudioReporterOptions
 ): QAStudioTestResult {
   const endTime = new Date(startTime.getTime() + result.duration);
 
-  return {
+  // Set defaults for options
+  const includeErrorSnippet = options?.includeErrorSnippet !== false; // default true
+  const includeErrorLocation = options?.includeErrorLocation !== false; // default true
+  const includeTestSteps = options?.includeTestSteps !== false; // default true
+  const includeConsoleOutput = options?.includeConsoleOutput === true; // default false
+
+  const testResult: QAStudioTestResult = {
     testCaseId: extractTestCaseId(test),
     title: test.title,
     fullTitle: getFullTitle(test),
@@ -27,6 +34,53 @@ export function convertTestResult(
     projectName: test.parent?.project()?.name,
     metadata: extractMetadata(test),
   };
+
+  // Add error snippet if available and enabled
+  if (includeErrorSnippet && result.error?.snippet) {
+    testResult.errorSnippet = result.error.snippet;
+  }
+
+  // Add error location if available and enabled
+  if (includeErrorLocation && result.error?.location) {
+    testResult.errorLocation = {
+      file: result.error.location.file,
+      line: result.error.location.line,
+      column: result.error.location.column,
+    };
+  }
+
+  // Add test steps if enabled
+  if (includeTestSteps && result.steps && result.steps.length > 0) {
+    testResult.steps = result.steps.map((step) => ({
+      title: step.title,
+      category: step.category,
+      startTime: step.startTime.toISOString(),
+      duration: step.duration,
+      error: step.error?.message,
+      location: step.location
+        ? {
+            file: step.location.file,
+            line: step.location.line,
+            column: step.location.column,
+          }
+        : undefined,
+    }));
+  }
+
+  // Add console output if enabled
+  if (includeConsoleOutput) {
+    const stdout = extractConsoleOutput(result.stdout);
+    const stderr = extractConsoleOutput(result.stderr);
+
+    if (stdout || stderr) {
+      testResult.consoleOutput = {
+        stdout,
+        stderr,
+      };
+    }
+  }
+
+  return testResult;
 }
 
 /**
@@ -121,6 +175,26 @@ export function determineAttachmentType(
     return 'trace';
   }
   return 'other';
+}
+
+/**
+ * Extract console output from test result
+ */
+export function extractConsoleOutput(output: (string | Buffer)[] | undefined): string | undefined {
+  if (!output || output.length === 0) {
+    return undefined;
+  }
+
+  const combined = output
+    .map((item) => {
+      if (typeof item === 'string') {
+        return item;
+      }
+      return item.toString('utf-8');
+    })
+    .join('\n');
+
+  return combined.trim() || undefined;
 }
 
 /**
