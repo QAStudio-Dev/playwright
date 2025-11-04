@@ -44,7 +44,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/QAStudio-Dev/playwright.git"
+    "url": "https://github.com/QAStudio-Dev/playwright-reporter.git"
   },
   "bugs": {
     "url": "https://github.com/QAStudio-Dev/playwright/issues"
