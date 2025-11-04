@@ -60,7 +60,7 @@ export interface QAStudioReporterOptions {
 
   /**
    * Batch size for sending test results
-   * @default 10
+   * @default 50
    */
   batchSize?: number;
 

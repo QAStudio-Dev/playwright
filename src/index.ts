@@ -10,7 +10,6 @@ import { QAStudioAPIClient } from './api-client';
 import type { QAStudioReporterOptions, ReporterState, QAStudioTestResult } from './types';
 import {
   convertTestResult,
-  batchArray,
   formatDuration,
   generateTestRunName,
   validateOptions,
@@ -61,6 +60,8 @@ export default class QAStudioReporter implements Reporter {
   private passedTests = 0;
   private failedTests = 0;
   private skippedTests = 0;
+  private resultQueue: QAStudioTestResult[] = [];
+  private flushPromises: Promise<void>[] = [];
 
   constructor(options: QAStudioReporterOptions) {
     // Validate options
@@ -85,7 +86,7 @@ export default class QAStudioReporter implements Reporter {
       environment: sanitizedOptions.environment ?? 'default',
       createTestRun: sanitizedOptions.createTestRun ?? true,
       verbose: sanitizedOptions.verbose ?? false,
-      batchSize: sanitizedOptions.batchSize ?? 10,
+      batchSize: sanitizedOptions.batchSize ?? 50,
       uploadScreenshots: sanitizedOptions.uploadScreenshots ?? true,
       uploadVideos: sanitizedOptions.uploadVideos ?? true,
       includeErrorSnippet: sanitizedOptions.includeErrorSnippet ?? true,
@@ -185,6 +186,31 @@ export default class QAStudioReporter implements Reporter {
           this.skippedTests++;
           break;
       }
+
+      // Stream results: convert and queue result immediately
+      if (this.state.testRunId) {
+        const qaResult = convertTestResult(test, result, testData.startTime, this.options);
+
+        // Filter attachments based on options
+        if (qaResult.attachments) {
+          qaResult.attachments = qaResult.attachments.filter((att) => {
+            if (att.type === 'screenshot' && !this.options.uploadScreenshots) {
+              return false;
+            }
+            if (att.type === 'video' && !this.options.uploadVideos) {
+              return false;
+            }
+            return true;
+          });
+        }
+
+        this.resultQueue.push(qaResult);
+
+        // Flush when batch size is reached
+        if (this.resultQueue.length >= this.options.batchSize) {
+          await this.flushResults();
+        }
+      }
     }
 
     this.log(
@@ -238,65 +264,57 @@ export default class QAStudioReporter implements Reporter {
       return;
     }
 
-    // Convert all tests to QAStudio.dev format
-    const results: QAStudioTestResult[] = [];
-
-    for (const [_testId, testData] of this.state.tests) {
-      // Only send final result (not retries)
-      if (testData.result.retry === testData.test.retries) {
-        const qaResult = convertTestResult(
-          testData.test,
-          testData.result,
-          testData.startTime,
-          this.options
-        );
-
-        // Filter attachments based on options
-        if (qaResult.attachments) {
-          qaResult.attachments = qaResult.attachments.filter((att) => {
-            if (att.type === 'screenshot' && !this.options.uploadScreenshots) {
-              return false;
-            }
-            if (att.type === 'video' && !this.options.uploadVideos) {
-              return false;
-            }
-            return true;
-          });
-        }
-
-        results.push(qaResult);
-      }
+    // Flush any remaining queued results
+    if (this.resultQueue.length > 0) {
+      await this.flushResults();
     }
 
-    this.log(`Sending ${results.length} test results in batches of ${this.options.batchSize}`);
+    // Wait for all pending flushes to complete
+    if (this.flushPromises.length > 0) {
+      this.log(`Waiting for ${this.flushPromises.length} pending batch submissions...`);
+      await Promise.allSettled(this.flushPromises);
+      this.flushPromises = [];
+    }
 
-    // Send results in batches
-    const batches = batchArray(results, this.options.batchSize);
+    this.log('All test results sent successfully');
+  }
 
-    for (let i = 0; i < batches.length; i++) {
-      const batch = batches[i];
-      this.log(`Sending batch ${i + 1}/${batches.length} (${batch.length} results)`);
+  /**
+   * Flush queued results to API
+   */
+  private async flushResults(): Promise<void> {
+    if (this.resultQueue.length === 0 || !this.state.testRunId) {
+      return;
+    }
 
-      try {
-        const response = await this.apiClient.submitTestResults({
-          testRunId: this.state.testRunId,
-          results: batch,
-        });
+    // Get batch to send and clear queue
+    const batch = [...this.resultQueue];
+    this.resultQueue = [];
 
-        this.log(
-          `Batch ${i + 1} submitted successfully: ${response.processedCount} results processed`
-        );
+    this.log(`Flushing batch of ${batch.length} results`);
+
+    // Send batch asynchronously (don't block test execution)
+    const flushPromise = this.apiClient
+      .submitTestResults({
+        testRunId: this.state.testRunId,
+        results: batch,
+      })
+      .then((response) => {
+        this.log(`Batch submitted successfully: ${response.processedCount} results processed`);
 
         if (response.errors && response.errors.length > 0) {
-          this.log(`Batch ${i + 1} had ${response.errors.length} errors:`);
+          this.log(`Batch had ${response.errors.length} errors:`);
           response.errors.forEach((err) => {
             this.log(`  - ${err.testTitle}: ${err.error}`);
           });
         }
-      } catch (error) {
-        this.handleError(`Failed to send batch ${i + 1}`, error);
-      }
-    }
+      })
+      .catch((error) => {
+        this.handleError('Failed to send batch', error);
+      });
+
+    // Track the promise so we can wait for it in onEnd
+    this.flushPromises.push(flushPromise);
   }
 
   /**

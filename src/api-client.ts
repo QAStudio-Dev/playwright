@@ -16,6 +16,8 @@ export class QAStudioAPIClient {
   private readonly maxRetries: number;
   private readonly timeout: number;
   private readonly verbose: boolean;
+  private readonly httpAgent: http.Agent;
+  private readonly httpsAgent: https.Agent;
 
   constructor(options: QAStudioReporterOptions) {
     this.apiUrl = options.apiUrl.replace(/\/$/, ''); // Remove trailing slash
@@ -23,6 +25,19 @@ export class QAStudioAPIClient {
     this.maxRetries = options.maxRetries ?? 3;
     this.timeout = options.timeout ?? 30000;
     this.verbose = options.verbose ?? false;
+
+    // Create HTTP agents with Keep-Alive for connection reuse
+    this.httpAgent = new http.Agent({
+      keepAlive: true,
+      keepAliveMsecs: 30000,
+      maxSockets: 10,
+    });
+
+    this.httpsAgent = new https.Agent({
+      keepAlive: true,
+      keepAliveMsecs: 30000,
+      maxSockets: 10,
+    });
   }
 
   /**
@@ -59,27 +74,23 @@ export class QAStudioAPIClient {
   }
 
   /**
-   * Upload an attachment
+   * Upload an attachment using multipart/form-data
    */
   async uploadAttachment(
-    testRunId: string,
     testResultId: string,
     name: string,
     contentType: string,
-    data: Buffer
-  ): Promise<{ url: string }> {
-    this.log(`Uploading attachment: ${name} (${contentType})`);
-    return this.request<{ url: string }>(
-      `/test-runs/${testRunId}/results/${testResultId}/attachments`,
-      {
-        method: 'POST',
-        body: {
-          name,
-          contentType,
-          data: data.toString('base64'),
-        },
-      }
-    );
+    data: Buffer,
+    type?: string
+  ): Promise<{
+    attachment: { id: string; filename: string; url: string; size: number; mimeType: string };
+  }> {
+    this.log(`Uploading attachment: ${name} (${contentType}) [${data.length} bytes]`);
+    return this.uploadMultipart(`/attachments`, {
+      file: { data, filename: name, contentType },
+      testResultId,
+      ...(type ? { type } : {}),
+    });
   }
 
   /**
@@ -146,6 +157,7 @@ export class QAStudioAPIClient {
           ...options.headers,
         },
         timeout: this.timeout,
+        agent: isHttps ? this.httpsAgent : this.httpAgent,
       };
 
       const req = httpModule.request(parsedUrl, requestOptions, (res) => {
@@ -184,6 +196,128 @@ export class QAStudioAPIClient {
         req.write(bodyData);
       }
 
+      req.end();
+    });
+  }
+
+  /**
+   * Upload multipart/form-data request
+   */
+  private async uploadMultipart<T>(path: string, fields: Record<string, unknown>): Promise<T> {
+    const url = `${this.apiUrl}${path}`;
+    let lastError: Error | null = null;
+
+    for (let attempt = 0; attempt < this.maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          this.log(`Retry attempt ${attempt + 1}/${this.maxRetries}`);
+          await this.sleep(Math.min(1000 * Math.pow(2, attempt), 10000));
+        }
+
+        return await this.makeMultipartRequest<T>(url, fields);
+      } catch (error) {
+        lastError = error as Error;
+        this.log(`Request failed (attempt ${attempt + 1}/${this.maxRetries}):`, error);
+
+        if (error instanceof APIError && error.statusCode >= 400 && error.statusCode < 500) {
+          throw error;
+        }
+      }
+    }
+
+    throw lastError || new Error('Request failed after all retries');
+  }
+
+  /**
+   * Make a multipart/form-data HTTP request
+   */
+  private async makeMultipartRequest<T>(url: string, fields: Record<string, unknown>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const parsedUrl = new URL(url);
+      const isHttps = parsedUrl.protocol === 'https:';
+      const httpModule = isHttps ? https : http;
+
+      // Generate boundary
+      const boundary = `----FormBoundary${Date.now()}${Math.random().toString(36)}`;
+
+      // Build multipart body
+      const parts: Buffer[] = [];
+
+      for (const [key, value] of Object.entries(fields)) {
+        if (key === 'file' && typeof value === 'object' && value !== null) {
+          // Handle file field
+          const file = value as { data: Buffer; filename: string; contentType: string };
+          parts.push(
+            Buffer.from(
+              `--${boundary}\r\n` +
+                `Content-Disposition: form-data; name="file"; filename="${file.filename}"\r\n` +
+                `Content-Type: ${file.contentType}\r\n\r\n`
+            )
+          );
+          parts.push(file.data);
+          parts.push(Buffer.from('\r\n'));
+        } else {
+          // Handle regular field
+          parts.push(
+            Buffer.from(
+              `--${boundary}\r\n` +
+                `Content-Disposition: form-data; name="${key}"\r\n\r\n` +
+                `${value}\r\n`
+            )
+          );
+        }
+      }
+
+      // Add closing boundary
+      parts.push(Buffer.from(`--${boundary}--\r\n`));
+
+      const body = Buffer.concat(parts);
+
+      const requestOptions: http.RequestOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': `multipart/form-data; boundary=${boundary}`,
+          'Content-Length': body.length,
+          Authorization: `Bearer ${this.apiKey}`,
+          'User-Agent': '@qastudio-dev/playwright/1.0.0',
+        },
+        timeout: this.timeout,
+        agent: isHttps ? this.httpsAgent : this.httpAgent,
+      };
+
+      const req = httpModule.request(parsedUrl, requestOptions, (res) => {
+        let data = '';
+
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        res.on('end', () => {
+          const statusCode = res.statusCode || 0;
+
+          if (statusCode >= 200 && statusCode < 300) {
+            try {
+              const parsed = data ? JSON.parse(data) : {};
+              resolve(parsed as T);
+            } catch (error) {
+              reject(new Error(`Failed to parse response: ${error}`));
+            }
+          } else {
+            reject(new APIError(statusCode, data || res.statusMessage || 'Request failed'));
+          }
+        });
+      });
+
+      req.on('error', (error) => {
+        reject(error);
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error(`Request timeout after ${this.timeout}ms`));
+      });
+
+      req.write(body);
       req.end();
     });
   }
