@@ -290,6 +290,11 @@ export interface SubmitTestResultsResponse {
   success: boolean;
   testRunId: string;
   processedCount: number;
+  results?: Array<{
+    testResultId: string;
+    testCaseId?: string;
+    title: string;
+  }>;
   errors?: Array<{
     testTitle: string;
     error: string;
@@ -327,6 +332,17 @@ export interface InternalTestData {
   result: TestResult;
   startTime: Date;
   endTime?: Date;
+}
+
+/**
+ * Pending attachment upload
+ */
+export interface PendingAttachment {
+  testResultId: string;
+  name: string;
+  contentType: string;
+  data: Buffer;
+  type: 'screenshot' | 'video' | 'trace' | 'other';
 }
 
 /**

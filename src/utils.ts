@@ -177,6 +177,50 @@ export function extractAttachments(result: TestResult): QAStudioAttachment[] {
 }
 
 /**
+ * Extract attachments as buffers for multipart upload
+ */
+export function extractAttachmentsAsBuffers(
+  result: TestResult
+): Array<{ name: string; contentType: string; data: Buffer; type: 'screenshot' | 'video' | 'trace' | 'other' }> {
+  const attachments: Array<{ name: string; contentType: string; data: Buffer; type: 'screenshot' | 'video' | 'trace' | 'other' }> = [];
+
+  for (const attachment of result.attachments) {
+    const type = determineAttachmentType(attachment.name, attachment.contentType);
+
+    // Get attachment as Buffer
+    let data: Buffer;
+    if (attachment.body) {
+      // If body is already a Buffer, use it; if string (base64), convert it
+      data = typeof attachment.body === 'string'
+        ? Buffer.from(attachment.body, 'base64')
+        : attachment.body;
+    } else if (attachment.path) {
+      // Read file from disk as Buffer
+      try {
+        data = fs.readFileSync(attachment.path);
+      } catch (error) {
+        console.warn(
+          `[QAStudio.dev Reporter] Failed to read attachment file: ${attachment.path}`,
+          error
+        );
+        continue; // Skip this attachment if we can't read it
+      }
+    } else {
+      continue; // Skip if no body or path
+    }
+
+    attachments.push({
+      name: attachment.name,
+      contentType: attachment.contentType,
+      data,
+      type,
+    });
+  }
+
+  return attachments;
+}
+
+/**
  * Determine attachment type from name and content type
  */
 export function determineAttachmentType(
