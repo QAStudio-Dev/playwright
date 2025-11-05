@@ -104,7 +104,9 @@ Test results will be automatically sent to QAStudio.dev!
 
 ## Linking Tests to QAStudio.dev Test Cases
 
-There are two ways to link Playwright tests to QAStudio.dev test cases:
+**Test case mapping is optional!** The reporter will automatically send all test results to QAStudio.dev, even without explicit test case IDs. Tests are automatically mapped based on the hierarchy of test names and groups from your Playwright test structure (using `describe` blocks and test titles). This maintains the same organization in QAStudio.dev as in your test files.
+
+However, if you want to link specific Playwright tests to existing QAStudio.dev test cases for better organization and traceability, there are two ways to do so:
 
 ### Method 1: Using Annotations (Recommended)
 
@@ -126,6 +128,15 @@ test('user can login', async ({ page }) => {
 ```typescript
 test('[QA-123] user can login', async ({ page }) => {
   // Your test code...
+});
+```
+
+### Without Test Case Mapping
+
+```typescript
+test('user can login', async ({ page }) => {
+  // Your test code...
+  // This test will still be reported to QAStudio.dev automatically!
 });
 ```
 
