@@ -7,7 +7,12 @@ import type {
   FullResult,
 } from '@playwright/test/reporter';
 import { QAStudioAPIClient } from './api-client';
-import type { QAStudioReporterOptions, ReporterState, QAStudioTestResult, PendingAttachment } from './types';
+import type {
+  QAStudioReporterOptions,
+  ReporterState,
+  QAStudioTestResult,
+  PendingAttachment,
+} from './types';
 import {
   convertTestResult,
   extractAttachmentsAsBuffers,
@@ -212,7 +217,7 @@ export default class QAStudioReporter implements Reporter {
         // Queue result with attachments for later upload
         this.resultQueue.push({
           result: qaResult,
-          attachments: filteredAttachments.map(att => ({
+          attachments: filteredAttachments.map((att) => ({
             testResultId: '', // Will be filled after result submission
             name: att.name,
             contentType: att.contentType,
@@ -309,7 +314,7 @@ export default class QAStudioReporter implements Reporter {
     this.log(`Flushing batch of ${batch.length} results`);
 
     // Extract just the results (without attachments) for submission
-    const results = batch.map(item => item.result);
+    const results = batch.map((item) => item.result);
 
     // Send batch asynchronously (don't block test execution)
     const flushPromise = this.apiClient

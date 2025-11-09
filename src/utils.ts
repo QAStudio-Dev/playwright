@@ -181,8 +181,18 @@ export function extractAttachments(result: TestResult): QAStudioAttachment[] {
  */
 export function extractAttachmentsAsBuffers(
   result: TestResult
-): Array<{ name: string; contentType: string; data: Buffer; type: 'screenshot' | 'video' | 'trace' | 'other' }> {
-  const attachments: Array<{ name: string; contentType: string; data: Buffer; type: 'screenshot' | 'video' | 'trace' | 'other' }> = [];
+): Array<{
+  name: string;
+  contentType: string;
+  data: Buffer;
+  type: 'screenshot' | 'video' | 'trace' | 'other';
+}> {
+  const attachments: Array<{
+    name: string;
+    contentType: string;
+    data: Buffer;
+    type: 'screenshot' | 'video' | 'trace' | 'other';
+  }> = [];
 
   for (const attachment of result.attachments) {
     const type = determineAttachmentType(attachment.name, attachment.contentType);
@@ -191,9 +201,10 @@ export function extractAttachmentsAsBuffers(
     let data: Buffer;
     if (attachment.body) {
       // If body is already a Buffer, use it; if string (base64), convert it
-      data = typeof attachment.body === 'string'
-        ? Buffer.from(attachment.body, 'base64')
-        : attachment.body;
+      data =
+        typeof attachment.body === 'string'
+          ? Buffer.from(attachment.body, 'base64')
+          : attachment.body;
     } else if (attachment.path) {
       // Read file from disk as Buffer
       try {

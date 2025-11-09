@@ -45,7 +45,7 @@ export class QAStudioAPIClient {
    */
   async createTestRun(request: CreateTestRunRequest): Promise<CreateTestRunResponse> {
     this.log('Creating test run:', request);
-    return this.request<CreateTestRunResponse>('/test-runs', {
+    return this.request<CreateTestRunResponse>('/runs', {
       method: 'POST',
       body: request,
     });
@@ -56,7 +56,7 @@ export class QAStudioAPIClient {
    */
   async submitTestResults(request: SubmitTestResultsRequest): Promise<SubmitTestResultsResponse> {
     this.log(`Submitting ${request.results.length} test results to run ${request.testRunId}`);
-    return this.request<SubmitTestResultsResponse>('/test-results', {
+    return this.request<SubmitTestResultsResponse>('/results', {
       method: 'POST',
       body: request,
     });
@@ -67,7 +67,7 @@ export class QAStudioAPIClient {
    */
   async completeTestRun(request: CompleteTestRunRequest): Promise<CompleteTestRunResponse> {
     this.log('Completing test run:', request);
-    return this.request<CompleteTestRunResponse>(`/test-runs/${request.testRunId}/complete`, {
+    return this.request<CompleteTestRunResponse>(`/runs/${request.testRunId}/complete`, {
       method: 'POST',
       body: request,
     });
