@@ -131,6 +131,29 @@ The repository uses GitHub Actions for automated releases and publishing:
 
 See `.github/WORKFLOWS.md` for complete documentation.
 
+#### Quick Release Commands
+
+To create and publish a new release using GitHub CLI:
+
+```bash
+# 1. Trigger release workflow (creates git tag and GitHub release)
+gh workflow run "Create Release" -f version=patch   # for patch version bump (1.2.3 -> 1.2.4)
+gh workflow run "Create Release" -f version=minor   # for minor version bump (1.2.3 -> 1.3.0)
+gh workflow run "Create Release" -f version=major   # for major version bump (1.2.3 -> 2.0.0)
+
+# 2. Wait for release workflow to complete, then get the new tag
+gh release list --limit 1
+
+# 3. Trigger publish workflow (publishes to npm)
+gh workflow run "Publish to npm" -f tag=v1.2.5      # replace with actual tag from step 2
+
+# 4. Monitor workflow progress
+gh run watch                                        # watch latest run
+gh run list --limit 5                               # list recent runs
+```
+
+**Note**: The publish workflow should auto-trigger on release creation, but can be manually triggered if needed.
+
 ### Manual
 
 ```bash
