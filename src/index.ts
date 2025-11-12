@@ -98,6 +98,7 @@ export default class QAStudioReporter implements Reporter {
       includeErrorSnippet: sanitizedOptions.includeErrorSnippet ?? true,
       includeErrorLocation: sanitizedOptions.includeErrorLocation ?? true,
       includeTestSteps: sanitizedOptions.includeTestSteps ?? true,
+      filterFixtureSteps: sanitizedOptions.filterFixtureSteps ?? true,
       includeConsoleOutput: sanitizedOptions.includeConsoleOutput ?? false,
       maxRetries: sanitizedOptions.maxRetries ?? 3,
       timeout: sanitizedOptions.timeout ?? 30000,

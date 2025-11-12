@@ -95,6 +95,12 @@ export interface QAStudioReporterOptions {
   includeTestSteps?: boolean;
 
   /**
+   * Filter out Playwright internal fixture setup/teardown steps
+   * @default true
+   */
+  filterFixtureSteps?: boolean;
+
+  /**
    * Include console output (stdout/stderr) for failed tests
    * @default false
    */
@@ -117,6 +123,60 @@ export interface QAStudioReporterOptions {
    * @default true
    */
   silent?: boolean;
+}
+
+/**
+ * Test execution step (hierarchical structure)
+ */
+export interface QAStudioTestStep {
+  /**
+   * Step title
+   */
+  title: string;
+
+  /**
+   * Step category (e.g., 'hook', 'test.step', 'expect', 'pw:api')
+   */
+  category: string;
+
+  /**
+   * Step start time (ISO 8601)
+   */
+  startTime: string;
+
+  /**
+   * Step duration in milliseconds
+   */
+  duration: number;
+
+  /**
+   * Step status
+   */
+  status: 'passed' | 'failed' | 'skipped' | 'timedOut';
+
+  /**
+   * Error message (if step failed)
+   */
+  error?: string;
+
+  /**
+   * Stack trace (if step failed)
+   */
+  stackTrace?: string;
+
+  /**
+   * Location in source code where step was defined
+   */
+  location?: {
+    file: string;
+    line: number;
+    column: number;
+  };
+
+  /**
+   * Nested steps (for hierarchical test structure)
+   */
+  steps?: QAStudioTestStep[];
 }
 
 /**
@@ -173,20 +233,9 @@ export interface QAStudioTestResult {
   };
 
   /**
-   * Test execution steps
+   * Test execution steps (hierarchical structure)
    */
-  steps?: Array<{
-    title: string;
-    category: string;
-    startTime: string;
-    duration: number;
-    error?: string;
-    location?: {
-      file: string;
-      line: number;
-      column: number;
-    };
-  }>;
+  steps?: QAStudioTestStep[];
 
   /**
    * Console output from the test

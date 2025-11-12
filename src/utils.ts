@@ -1,6 +1,11 @@
 import * as fs from 'fs';
-import type { TestCase, TestResult, Suite } from '@playwright/test/reporter';
-import type { QAStudioTestResult, QAStudioAttachment, QAStudioReporterOptions } from './types';
+import type { TestCase, TestResult, Suite, TestStep } from '@playwright/test/reporter';
+import type {
+  QAStudioTestResult,
+  QAStudioAttachment,
+  QAStudioReporterOptions,
+  QAStudioTestStep,
+} from './types';
 
 /**
  * Convert Playwright test result to QAStudio.dev format
@@ -51,20 +56,10 @@ export function convertTestResult(
 
   // Add test steps if enabled
   if (includeTestSteps && result.steps && result.steps.length > 0) {
-    testResult.steps = result.steps.map((step) => ({
-      title: step.title,
-      category: step.category,
-      startTime: step.startTime.toISOString(),
-      duration: step.duration,
-      error: step.error?.message,
-      location: step.location
-        ? {
-            file: step.location.file,
-            line: step.location.line,
-            column: step.location.column,
-          }
-        : undefined,
-    }));
+    const filterFixtures = options?.filterFixtureSteps !== false; // default true
+    testResult.steps = result.steps
+      .map((step) => convertTestStep(step, filterFixtures))
+      .filter((step) => step !== null) as QAStudioTestStep[];
   }
 
   // Add console output if enabled
@@ -81,6 +76,59 @@ export function convertTestResult(
   }
 
   return testResult;
+}
+
+/**
+ * Convert Playwright test step to QAStudio.dev format (recursive for nested steps)
+ * Returns null if step should be filtered out
+ */
+export function convertTestStep(step: TestStep, filterFixtures = true): QAStudioTestStep | null {
+  // Filter out fixture steps if enabled
+  if (filterFixtures && step.category === 'fixture') {
+    return null;
+  }
+
+  // Map Playwright step status to our format
+  let status: 'passed' | 'failed' | 'skipped' | 'timedOut';
+  if (step.error) {
+    status = 'failed';
+  } else if (step.duration === -1) {
+    status = 'skipped';
+  } else {
+    status = 'passed';
+  }
+
+  const qaStep: QAStudioTestStep = {
+    title: step.title,
+    category: step.category,
+    startTime: step.startTime.toISOString(),
+    duration: step.duration,
+    status,
+  };
+
+  // Add error details if present
+  if (step.error) {
+    qaStep.error = step.error.message;
+    qaStep.stackTrace = step.error.stack;
+  }
+
+  // Add location if present
+  if (step.location) {
+    qaStep.location = {
+      file: step.location.file,
+      line: step.location.line,
+      column: step.location.column,
+    };
+  }
+
+  // Recursively convert nested steps
+  if (step.steps && step.steps.length > 0) {
+    qaStep.steps = step.steps
+      .map((nestedStep) => convertTestStep(nestedStep, filterFixtures))
+      .filter((s) => s !== null) as QAStudioTestStep[];
+  }
+
+  return qaStep;
 }
 
 /**
