@@ -152,7 +152,7 @@ export interface QAStudioTestStep {
   /**
    * Step status
    */
-  status: 'passed' | 'failed' | 'skipped' | 'timedOut';
+  status: 'passed' | 'failed' | 'skipped' | 'timedout';
 
   /**
    * Error message (if step failed)
@@ -201,7 +201,7 @@ export interface QAStudioTestResult {
   /**
    * Test status
    */
-  status: 'passed' | 'failed' | 'skipped' | 'timedOut';
+  status: 'passed' | 'failed' | 'skipped' | 'timedout';
 
   /**
    * Duration in milliseconds

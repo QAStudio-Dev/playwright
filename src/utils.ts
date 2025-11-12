@@ -89,7 +89,7 @@ export function convertTestStep(step: TestStep, filterFixtures = true): QAStudio
   }
 
   // Map Playwright step status to our format
-  let status: 'passed' | 'failed' | 'skipped' | 'timedOut';
+  let status: 'passed' | 'failed' | 'skipped' | 'timedout';
   if (step.error) {
     status = 'failed';
   } else if (step.duration === -1) {
@@ -170,14 +170,14 @@ export function getFullTitle(test: TestCase): string {
 /**
  * Map Playwright test status to QAStudio.dev status
  */
-export function mapTestStatus(status: string): 'passed' | 'failed' | 'skipped' | 'timedOut' {
+export function mapTestStatus(status: string): 'passed' | 'failed' | 'skipped' | 'timedout' {
   switch (status) {
     case 'passed':
       return 'passed';
     case 'failed':
       return 'failed';
     case 'timedOut':
-      return 'timedOut';
+      return 'timedout';
     case 'skipped':
     case 'interrupted':
       return 'skipped';
